@@ -4,6 +4,8 @@ import Layout from '@/components/Layout';
 import { AddEmployeeForm } from '@/components/AddEmployeeForm';
 
 const AddEmployee = () => {
+  console.log('AddEmployee page is rendering');
+  
   return (
     <Layout>
       <div className="p-6 space-y-6">

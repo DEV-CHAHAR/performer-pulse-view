@@ -29,6 +29,8 @@ interface AddEmployeeFormData {
 const departments = ['Engineering', 'Marketing', 'Sales', 'HR', 'Finance', 'Operations', 'Design'];
 
 export const AddEmployeeForm = () => {
+  console.log('AddEmployeeForm is rendering');
+  
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { addEmployee, employees } = useStore();
   const { toast } = useToast();
@@ -49,6 +51,7 @@ export const AddEmployeeForm = () => {
   });
 
   const onSubmit = async (data: AddEmployeeFormData) => {
+    console.log('Form submitted with data:', data);
     setIsSubmitting(true);
     
     try {
@@ -85,6 +88,7 @@ export const AddEmployeeForm = () => {
       
       form.reset();
     } catch (error) {
+      console.error('Error adding employee:', error);
       toast({
         variant: "destructive",
         title: "Error",
