@@ -1,19 +1,33 @@
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import Layout from '@/components/Layout';
 import { EmployeeCard } from '@/components/EmployeeCard';
 import { SearchAndFilter } from '@/components/SearchAndFilter';
+import { LoadingSpinner, LoadingCard, ErrorMessage } from '@/components/LoadingSpinner';
 import { useEmployees } from '@/hooks/useEmployees';
+import { useStore } from '@/store/useStore';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Users, TrendingUp, Star, BookmarkIcon } from 'lucide-react';
-import { useBookmarks } from '@/hooks/useBookmarks';
 
 const Dashboard = () => {
   const { employees, loading, error } = useEmployees();
-  const { bookmarks } = useBookmarks();
-  const [searchTerm, setSearchTerm] = useState('');
-  const [departmentFilter, setDepartmentFilter] = useState('All');
-  const [ratingFilter, setRatingFilter] = useState('All');
+  const { 
+    bookmarks, 
+    searchTerm, 
+    departmentFilter, 
+    ratingFilter,
+    setSearchTerm,
+    setDepartmentFilter,
+    setRatingFilter,
+    setEmployees 
+  } = useStore();
+
+  // Update store when employees are loaded
+  useEffect(() => {
+    if (employees.length > 0) {
+      setEmployees(employees);
+    }
+  }, [employees, setEmployees]);
 
   const filteredEmployees = useMemo(() => {
     return employees.filter(employee => {
@@ -49,17 +63,23 @@ const Dashboard = () => {
     return (
       <Layout>
         <div className="p-6">
-          <div className="animate-pulse space-y-6">
-            <div className="h-8 bg-slate-200 rounded w-1/4"></div>
-            <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+          <div className="space-y-6">
+            <div className="animate-pulse">
+              <div className="h-8 bg-slate-200 rounded w-1/4 mb-2"></div>
+              <div className="h-4 bg-slate-200 rounded w-1/3"></div>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
               {[...Array(4)].map((_, i) => (
-                <div key={i} className="h-24 bg-slate-200 rounded"></div>
+                <div key={i} className="h-24 bg-slate-200 rounded animate-pulse"></div>
               ))}
             </div>
-            <div className="h-20 bg-slate-200 rounded"></div>
+            
+            <div className="h-20 bg-slate-200 rounded animate-pulse"></div>
+            
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
               {[...Array(6)].map((_, i) => (
-                <div key={i} className="h-64 bg-slate-200 rounded"></div>
+                <LoadingCard key={i} />
               ))}
             </div>
           </div>
@@ -72,9 +92,11 @@ const Dashboard = () => {
     return (
       <Layout>
         <div className="p-6">
-          <div className="text-center py-12">
-            <p className="text-red-600">{error}</p>
-          </div>
+          <ErrorMessage 
+            title="Failed to load employees"
+            message={error}
+            onRetry={() => window.location.reload()}
+          />
         </div>
       </Layout>
     );
@@ -90,7 +112,7 @@ const Dashboard = () => {
 
         {/* Stats Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <Card className="border-slate-200">
+          <Card className="border-slate-200 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">Total Employees</CardTitle>
               <Users className="h-4 w-4 text-blue-600" />
@@ -100,7 +122,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200">
+          <Card className="border-slate-200 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">Average Rating</CardTitle>
               <Star className="h-4 w-4 text-yellow-600" />
@@ -110,7 +132,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200">
+          <Card className="border-slate-200 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">High Performers</CardTitle>
               <TrendingUp className="h-4 w-4 text-green-600" />
@@ -120,7 +142,7 @@ const Dashboard = () => {
             </CardContent>
           </Card>
 
-          <Card className="border-slate-200">
+          <Card className="border-slate-200 hover:shadow-md transition-shadow">
             <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
               <CardTitle className="text-sm font-medium text-slate-600">Bookmarked</CardTitle>
               <BookmarkIcon className="h-4 w-4 text-purple-600" />
@@ -151,7 +173,9 @@ const Dashboard = () => {
           
           {filteredEmployees.length === 0 ? (
             <div className="text-center py-12">
-              <p className="text-slate-500">No employees found matching your criteria.</p>
+              <Users className="h-16 w-16 text-slate-300 mx-auto mb-4" />
+              <h3 className="text-xl font-medium text-slate-900 mb-2">No employees found</h3>
+              <p className="text-slate-500">No employees match your current search criteria.</p>
             </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
